@@ -1,59 +1,37 @@
 # Plagiarism Checker & AI Detector
-Open-source tool untuk deteksi plagiarisme dan AI-generated text.
+Open-source tool for detecting plagiarism and AI-generated text.
 
-
-## Features
-- **Plagiarism Detection**: Scraping real-time via Google & ddgr.
-- **AI Detection**: Berbasis statistik (TTR, Burstiness, Hapax Ratio).
-- **Format Support**: DOCX, PDF, TXT.
-- **Agent-Ready**: Dirancang untuk dijalankan otomatis oleh AI Agent.
-
-## Quick Installation
+## Manual Installation
 
 ```bash
-# 1. Clone Repository
+# 1. Clone the repository
 git clone https://github.com/irgifebry/plagiarism-checker.git
 cd plagiarism-checker
 
-# 2. Setup Venv
+# 2. Set up Python virtual environment
 python3 -m venv venv
 source venv/bin/activate
 
-# 3. Install Dependencies
+# 3. Install required packages
 pip install pymupdf python-docx requests beautifulsoup4
+
+# 4. Install ddgr (for plagiarism search)
 sudo apt install ddgr -y
 ```
 
 ## Usage
 
 ```bash
-# Extract text
-python3 scripts/extract_text.py <file.docx|.pdf|.txt> > temp.txt
+# Extract text from a document
+python3 scripts/extract_text.py <file_path> > extracted.txt
 
-# Analyze
-python3 scripts/analyze.py < temp.txt
+# Analyze the extracted text
+python3 scripts/analyze.py < extracted.txt
 ```
 
----
+## Integration Guide for AI Agents
 
-# Integration Guide for AI Agents
-
-## Table of Contents
-
-1. [Hermes Agent](#hermes-agent)
-2. [Claude Code](#claude-code)
-3. [Cursor Editor](#cursor-editor)
-4. [Windsurf](#windsurf)
-5. [Amazon Q](#amazon-q)
-6. [OpenCode](#opencode)
-7. [Generic Agent](#generic-agent)
-
----
-
-## Hermes Agent
-
-### Setup
-
+### Hermes Agent
 ```bash
 cd ~/.hermes/skills/
 sudo rm -rf plagiarism-checker || true
@@ -69,20 +47,7 @@ sudo apt install ddgr -y
 hermes status --show-skills
 ```
 
-### Usage
-
-```bash
-skill_view(name='plagiarism-checker')
-source venv/bin/activate
-python3 scripts/analyze.py < document.txt
-```
-
----
-
-## Claude Code
-
-### Setup
-
+### Claude Code
 ```bash
 mkdir -p ~/.claude-code/tools/plagiarism-checker
 git clone https://github.com/irgifebry/plagiarism-checker.git ~/.claude-code/tools/plagiarism-checker
@@ -93,35 +58,16 @@ pip install pymupdf python-docx requests beautifulsoup4
 sudo apt install ddgr -y
 ```
 
-### Usage
-
-> "Run plagiarism check on proposal.docx"
-
----
-
-## Cursor Editor
-
-### Setup
-
+### Cursor
 ```bash
 mkdir -p ~/.cursor/tools/plagiarism-checker
 git clone https://github.com/irgifebry/plagiarism-checker.git ~/.cursor/tools/plagiarism-checker
+
 pip install --user pymupdf python-docx requests beautifulsoup4
 sudo apt install ddgr -y
 ```
 
-### Usage
-
-```
-Cmd+K → "Check document.docx for plagiarism using ~/.cursor/tools/plagiarism-checker/scripts/analyze.py"
-```
-
----
-
-## Windsurf
-
-### Setup
-
+### Windsurf
 ```bash
 mkdir -p ~/.windsurf/tools/plagiarism-checker
 git clone https://github.com/irgifebry/plagiarism-checker.git ~/.windsurf/tools/plagiarism-checker
@@ -133,12 +79,7 @@ pip install pymupdf python-docx requests beautifulsoup4
 sudo apt install ddgr
 ```
 
----
-
-## Amazon Q
-
-### Setup
-
+### Amazon Q
 ```bash
 mkdir -p ~/.aws/tools/plagiarism-checker
 git clone https://github.com/irgifebry/plagiarism-checker.git ~/.aws/tools/plagiarism-checker
@@ -150,14 +91,11 @@ pip install pymupdf python-docx requests beautifulsoup4
 sudo apt install ddgr
 ```
 
----
-
-## OpenCode
-
-### Setup
-
+### OpenCode
 ```bash
-opencode tools install plagiarism-checker --url https://github.com/irgifebry/plagiarism-checker --path ~/.opencode/tools/plagiarism-checker
+opencode tools install plagiarism-checker \
+  --url https://github.com/irgifebry/plagiarism-checker \
+  --path ~/.opencode/tools/plagiarism-checker
 cd ~/.opencode/tools/plagiarism-checker
 python3 -m venv venv
 source venv/bin/activate
@@ -165,39 +103,30 @@ pip install pymupdf python-docx requests beautifulsoup4
 sudo apt install ddgr
 ```
 
----
-
-## Generic Agent (Custom Integration)
-
-### REST API Wrapper
-
-```python
-from fastapi import FastAPI
-import subprocess
-
-app = FastAPI()
-
-@app.post("/check")
-async def check_plagiarism(file_path: str):
-    extract = subprocess.check_output(f"python3 scripts/extract_text.py {file_path}", shell=True).decode()
-    result = subprocess.run("python3 scripts/analyze.py", input=extract, capture_output=True, shell=True, text=True)
-    return {"report": result.stdout}
-```
-
----
-
 ## Troubleshooting
 
-### ddgr Not Found
+### ddgr not found
 ```bash
 sudo apt install ddgr
 ```
 
-### ModuleNotFoundError
+### Module not found
 ```bash
 source venv/bin/activate
 pip install --upgrade pymupdf python-docx requests beautifulsoup4
 ```
 
----
+## Usage Example
 
+```bash
+# Extract text from a DOCX file
+python3 scripts/extract_text.py proposal.docx > extracted.txt
+
+# Analyze the extracted text
+python3 scripts/analyze.py < extracted.txt
+```
+
+The generated Markdown report includes:
+- Plagiarism score
+- AI detection metrics (TTR, Burstiness, N-gram Diversity, Hapax Ratio)
+- Highlighted matching sentences
