@@ -273,9 +273,3 @@ We welcome improvements! Follow these steps:
 Please also update the documentation (README or `SKILL.md`) if your changes affect usage or configuration.
 
 ---  
-
-Made for the open-source community. No API keys, no subscriptions, just pure local detection.
-
-## License
-
-This project is released under the **MIT License**. See the `LICENSE` file for details.
