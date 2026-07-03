@@ -1,7 +1,6 @@
 # Plagiarism Checker & AI Detector
 Open-source tool untuk deteksi plagiarisme dan AI-generated text.
 
-🌐 **Live demo:** [https://irgifebry.github.io/plagiarism-checker/](https://irgifebry.github.io/plagiarism-checker/)
 
 ## Features
 - **Plagiarism Detection**: Scraping real-time via Google & ddgr.
@@ -202,5 +201,3 @@ pip install --upgrade pymupdf python-docx requests beautifulsoup4
 
 ---
 
-## License
-MIT
