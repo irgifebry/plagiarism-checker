@@ -13,7 +13,6 @@ Open‑source tool for detecting plagiarism and AI‑generated text in DOCX, PDF
 - [Agent Integration](#agent-integration)  
 - [Quick‑Start Examples](#quick-start-examples)  
 - [Troubleshooting](#troubleshooting)  
-- [Contributing](#contributing)  
 
 ---  
 
@@ -41,7 +40,7 @@ Open‑source tool for detecting plagiarism and AI‑generated text in DOCX, PDF
 ---  
 
 ## Installation (Manual)
-> **No `npx` or automatic bootstrapping – all steps are explicit.**
+> **All steps are explicit.**
 
 ```bash
 # 1. Clone the repository
@@ -260,16 +259,6 @@ Output (truncated):
 
 ---  
 
-## Contributing
-We welcome improvements! Follow these steps:
 
-1. **Fork** the repository on GitHub.  
-2. Create a **feature branch**: `git checkout -b feat/your-feature-name`.  
-3. Make changes, keeping code **PEP 8** compliant, line length ≤ 88, and adding type hints where possible.  
-4. Add or update tests (if applicable) under `tests/`.  
-5. Commit with a clear message: `git commit -m "feat: add XYZ detector"`.  
-6. Push to your fork and open a **Pull Request** describing the change and its impact.  
-
-Please also update the documentation (README or `SKILL.md`) if your changes affect usage or configuration.
 
 ---  
