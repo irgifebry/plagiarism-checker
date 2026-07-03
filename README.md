@@ -44,18 +44,18 @@ Open‑source tool for detecting plagiarism and AI‑generated text in DOCX, PDF
 > **No `npx` or automatic bootstrapping – all steps are explicit.**
 
 ```bash
-# 1️⃣ Clone the repository
+# 1. Clone the repository
 git clone https://github.com/irgifebry/plagiarism-checker.git
 cd plagiarism-checker
 
-# 2️⃣ Create a Python virtual environment
+# 2. Create a Python virtual environment
 python3 -m venv venv
 source venv/bin/activate   # .\\venv\\Scripts\\activate on Windows PowerShell
 
-# 3️⃣ Install required Python packages
+# 3. Install required Python packages
 pip install pymupdf python-docx requests beautifulsoup4
 
-# 4️⃣ Install the web‑search CLI (ddgr)
+# 4. Install the web-search CLI (ddgr)
 sudo apt install ddgr -y   # Debian/Ubuntu
 # macOS: brew install ddgr
 # Windows (chocolatey): choco install ddgr
@@ -222,10 +222,10 @@ See the **Programmatic API** section above; import `extract_text` and `analyze_t
 
 ## Quick‑Start Examples
 ```bash
-# 1️⃣ Extract text from a PDF
+# 1. Extract text from a PDF
 python3 scripts/extract_text.py lecture.pdf > lecture.txt
 
-# 2️⃣ Analyze for plagiarism & AI content
+# 2. Analyze for plagiarism & AI content
 python3 scripts/analyze.py < lecture.txt
 ```
 Output (truncated):
@@ -274,7 +274,7 @@ Please also update the documentation (README or `SKILL.md`) if your changes affe
 
 ---  
 
-*Made with ❤️ for the open‑source community. No API keys, no subscriptions, just pure local detection.
+Made for the open-source community. No API keys, no subscriptions, just pure local detection.
 
 ## License
 
