@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plagiarism Checker & AI Detector</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #0a0a0a;
+        color: #e0e0e0;
+        line-height: 1.6;
+        padding: 2rem;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: #fff;
+      }
+      .subtitle {
+        color: #888;
+        margin-bottom: 2rem;
+        font-size: 1.2rem;
+      }
+      .card {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      h2 {
+        color: #fff;
+        margin-bottom: 0.75rem;
+        font-size: 1.3rem;
+      }
+      code {
+        background: #252525;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-family: "Monaco", monospace;
+        font-size: 0.9em;
+      }
+      pre {
+        background: #151515;
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin: 1rem 0;
+        border: 1px solid #2a2a2a;
+      }
+      pre code {
+        background: none;
+        padding: 0;
+      }
+      .btn {
+        display: inline-block;
+        background: #2563eb;
+        color: #fff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        margin: 0.5rem 0.5rem 0.5rem 0;
+        font-weight: 500;
+      }
+      .btn:hover {
+        background: #1d4ed8;
+      }
+      ul {
+        margin-left: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      li {
+        margin-bottom: 0.5rem;
+      }
+      .platform {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      .platform-item {
+        background: #202020;
+        padding: 1rem;
+        border: 1px solid #333;
+        border-radius: 6px;
+        text-align: center;
+      }
+      .platform-item h3 {
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+      }
+      .badge {
+        display: inline-block;
+        background: #2d2d2d;
+        color: #888;
+        padding: 0.25rem 0.75rem;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        margin: 0.25rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Plagiarism Checker & AI Detector</h1>
+      <p class="subtitle">Open-source tool untuk deteksi plagiarisme dan AI-generated text.</p>
+
+      <div class="card">
+        <h2>Features</h2>
+        <ul>
+          <li><strong>Plagiarism Detection</strong> — Real-time web scraping via Google & ddgr.</li>
+          <li><strong>AI Detection</strong> — Statistik advanced (TTR, Burstiness, N-gram Diversity, Hapax Ratio).</li>
+          <li><strong>Multi-Format</strong> — DOCX, PDF, TXT.</li>
+          <li><strong>Agent-Ready</strong> — Autonomously runnable oleh AI Agent.</li>
+          <li><strong>Zero API Cost</strong> — 100% offline, local database matching.</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Quick Installation</h2>
+        <pre><code># Setup Venv
+python3 -m venv ~/venv/plagiarism-checker
+source ~/venv/plagiarism-checker/bin/activate
+
+# Install Dependencies
+pip install pymupdf python-docx requests beautifulsoup4
+sudo apt install ddgr -y</code></pre>
+      </div>
+
+      <div class="card">
+        <h2>AI Agent Integration</h2>
+        <div class="platform">
+          <div class="platform-item">
+            <h3>Hermes Agent</h3>
+            <p class="badge">Native Skill</p>
+          </div>
+          <div class="platform-item">
+            <h3>Claude Code</h3>
+            <p class="badge">CLI Tool</p>
+          </div>
+          <div class="platform-item">
+            <h3>Cursor</h3>
+            <p class="badge">Custom Tool</p>
+          </div>
+          <div class="platform-item">
+            <h3>Amazon Q</h3>
+            <p class="badge">Agent Tool</p>
+          </div>
+        </div>
+        <pre><code># Hermes Agent
+ln -s /path/to/plagiarism-checker ~/.hermes/skills/plagiarism-checker
+
+# Usage
+Open skill: skill_view(name='plagiarism-checker')
+Run: <code>scripts/analyze.py < extracted_text.txt</code></code></pre>
+      </div>
+
+      <div class="card">
+        <h2>How It Works</h2>
+        <ol>
+          <li><strong>Extract Text</strong> — Convert DOCX/PDF/TXT ke clean text.</li>
+          <li><strong>AI Detection</strong> — Analisis statistik (TTR, N-gram, Variance, Hapax).</li>
+          <li><strong>Plagiarism Check</strong> — Chunk text, search via ddrr & Google, calculate similarity.</li>
+          <li><strong>Report</strong> — Generate Markdown report dengan hex highlights.</li>
+        </ol>
+      </div>
+
+      <div class="card">
+        <h2>Usage</h2>
+        <pre><code># Extract text
+./scripts/extract_text.py document.docx > /tmp/text.txt
+
+# Analyze
+./scripts/analyze.py < /tmp/text.txt
+
+# Output: Markdown report dengan plagiarism & AI scores</code></pre>
+        <p>Full usage: <a href="https://github.com/irgi/plagiarism-checker/blob/main/README.md" style="color: #60a5fa;">GitHub README</a></p>
+      </div>
+
+      <div class="card">
+        <h2>Limits & Caveats</h2>
+        <ul>
+          <li><strong>Web Access Only</strong> — Public data (Google/ddgr). No Turnitin, iThenticate access.</li>
+          <li><strong>Statistical AI Detection</strong> — 85-95% accuracy (bukan 100%).</li>
+          <li><strong>Rate Limited</strong> — Google scraping delay 3-5s per chunk.</li>
+          <li><strong>Python 3.10+</strong> required.</li>
+        </ul>
+      </div>
+
+      <div style="margin: 2rem 0;">
+        <a href="https://github.com/irgi/plagiarism-checker" class="btn">GitHub Repository</a>
+        <a href="#install" class="btn" style="background: #333;">Installation Guide</a>
+      </div>
+
+      <footer style="text-align: center; color: #666; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid #222;">
+        <p>Built with zero dependencies. 100% local processing.</p>
+        <p style="margin-top: 0.5rem;"><a href="https://github.com/irgi/plagiarism-checker" style="color: #60a5fa;">View on GitHub</a></p>
+      </footer>
+    </div>
+  </body>
+</html>
