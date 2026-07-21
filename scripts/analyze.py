@@ -1,19 +1,12 @@
 #!/usr/bin/env python3
-"""Advanced plagiarism + AI detection with Google scraping (rate-limited)."""
+"""Advanced plagiarism + AI detection with concurrent async search and flexible scoring."""
 import sys
-import subprocess
 import statistics
-import time
 import re
+import asyncio
 from collections import Counter
 from urllib.parse import quote_plus
-
-try:
-    import requests
-    from bs4 import BeautifulSoup
-except ImportError:
-    requests = None
-    BeautifulSoup = None
+from duckduckgo_search import DDGS
 
 STOPWORDS = set([
     'yang', 'di', 'dan', 'dari', 'untuk', 'pada', 'dengan', 'itu', 'adalah',
@@ -23,9 +16,14 @@ STOPWORDS = set([
     'with', 'as', 'by', 'an', 'be', 'this', 'which', 'or', 'from', 'at',
 ])
 
-# Rate limit: seconds between Google requests
-DELAY = 3.0
-
+# Flexible AI detection thresholds.
+# 'metric': ( (strong_threshold, strong_penalty), (weak_threshold, weak_penalty), is_lower_bad )
+AI_THRESHOLDS = {
+    'ttr': ((0.40, 25), (0.45, 10), True),
+    'ngram_div': ((0.50, 25), (0.60, 10), True),
+    'burstiness': ((50, 25), (80, 10), True),
+    'hapax_ratio': ((0.35, 25), (0.45, 10), True),
+}
 
 def get_clean_words(text):
     words = [w.strip(".,!?:;\"'()[]{}1234567890").lower() for w in text.split()]
@@ -39,7 +37,7 @@ def extract_key_sentences(text, n=8):
     scored = []
     for s in sentences:
         words = s.split()
-        # Score by word count and unique words
+        if not words: continue
         unique_ratio = len(set(w.lower() for w in words)) / len(words)
         score = len(words) * unique_ratio
         scored.append((score, s))
@@ -47,48 +45,13 @@ def extract_key_sentences(text, n=8):
     return [s for _, s in scored[:n]]
 
 
-def google_scrape(query):
-    """Scrape Google search results for a query. Returns list of (title, url, snippet)."""
-    if not requests or not BeautifulSoup:
-        return []
+async def search_web(query):
+    """Async search the web using DuckDuckGo and return top 3 results."""
     try:
-        url = f"https://www.google.com/search?q={quote_plus(query)}&hl=en"
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/128.0',
-            'Accept-Language': 'en-US,en;q=0.9,id-ID;q=0.8,id;q=0.7',
-        }
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return []
-        soup = BeautifulSoup(r.text, 'html.parser')
-        results = []
-        for g in soup.select('div.g'):
-            title_el = g.select_one('h3')
-            link_el = g.select_one('a[href]')
-            snippet_el = g.select_one('.VwiC3b, .IsZvec, span.st')
-            if title_el and link_el:
-                results.append({
-                    'title': title_el.get_text(strip=True),
-                    'url': link_el['href'],
-                    'snippet': snippet_el.get_text(strip=True) if snippet_el else '',
-                })
-        return results[:5]
+        results = await DDGS().atext(query, max_results=3)
+        return {'query': query, 'results': [{'title': r['title'], 'url': r['href'], 'snippet': r['body']} for r in results]}
     except Exception:
-        return []
-
-
-def ddgr_search(query):
-    """Search via ddgr CLI. Returns list of dicts."""
-    try:
-        res = subprocess.run(
-            ['ddgr', '--json', '--np', '5', query],
-            capture_output=True, text=True, timeout=15
-        )
-        import json
-        data = json.loads(res.stdout) if res.stdout.strip().startswith('[') else []
-        return data
-    except Exception:
-        return []
+        return {'query': query, 'results': []}
 
 
 def text_similarity_ratio(text_a, text_b):
@@ -101,42 +64,31 @@ def text_similarity_ratio(text_a, text_b):
     return len(overlap) / min(len(words_a), len(words_b))
 
 
-def plagiarism_check(text):
-    """Multi-engine plagiarism check with rate limiting."""
-    sentences = extract_key_sentences(text, n=6)
+async def plagiarism_check(text):
+    """Concurrent plagiarism check using an async search engine."""
+    key_sentences = extract_key_sentences(text, n=15)
+    if not key_sentences:
+        return 0, []
+
+    print(f">> Checking plagiarism ({len(key_sentences)} queries concurrently)...", file=sys.stderr)
+
+    tasks = [search_web(s[:250]) for s in key_sentences]
+    search_results = await asyncio.gather(*tasks)
+
     sources = []
     hits = 0
-
-    for i, sentence in enumerate(sentences):
-        query = sentence[:120]  # Google limit ~128 chars effective
-        print(f"  [{i+1}/{len(sentences)}] Searching: {query[:60]}...", file=sys.stderr)
-
-        # Try ddgr first
-        ddgr_results = ddgr_search(query)
-        if ddgr_results:
-            hits += 1
-            sources.append({
-                'query': query[:80],
-                'engine': 'ddgr',
-                'results': ddgr_results[:3],
-            })
-            time.sleep(DELAY)
-            continue
-
-        # Fallback: Google scraping (rate limited)
-        if requests and BeautifulSoup:
-            g_results = google_scrape(query)
-            if g_results:
+    for res in search_results:
+        if res['results']:
+            top_hit_similarity = text_similarity_ratio(res['query'], res['results'][0]['snippet'])
+            if top_hit_similarity > 0.3:
                 hits += 1
                 sources.append({
-                    'query': query[:80],
-                    'engine': 'google',
-                    'results': g_results[:3],
+                    'query': res['query'][:80],
+                    'engine': 'DuckDuckGo',
+                    'results': res['results'],
                 })
 
-        time.sleep(DELAY)
-
-    score = hits / len(sentences) if sentences else 0
+    score = hits / len(key_sentences)
     return score, sources
 
 
@@ -145,19 +97,12 @@ def calculate_ai_metrics(text):
     if not words:
         return None
 
-    # TTR (filtered)
     ttr = len(set(words)) / len(words)
-
-    # N-gram diversity (3-grams)
     trigrams = [tuple(words[i:i+3]) for i in range(len(words)-2)]
     ngram_div = len(set(trigrams)) / len(trigrams) if trigrams else 0
-
-    # Sentence burstiness
     sentences = [s for s in re.split(r'[.!?]+', text) if len(s.split()) > 3]
     lengths = [len(s.split()) for s in sentences]
     burstiness = statistics.variance(lengths) if len(lengths) > 1 else 0
-
-    # Vocabulary richness (hapax legomena ratio)
     freq = Counter(words)
     hapax = sum(1 for w in freq if freq[w] == 1)
     hapax_ratio = hapax / len(freq) if freq else 0
@@ -171,29 +116,26 @@ def calculate_ai_metrics(text):
 
 
 def ai_score(metrics):
+    """Calculate AI score based on a flexible threshold configuration."""
     if not metrics:
         return 0
+
     score = 0
-    # TTR < 0.40 suggests AI
-    if metrics['ttr'] < 0.40:
-        score += 25
-    elif metrics['ttr'] < 0.45:
-        score += 10
-    # N-gram diversity < 0.50 suggests AI
-    if metrics['ngram_div'] < 0.50:
-        score += 25
-    elif metrics['ngram_div'] < 0.60:
-        score += 10
-    # Burstiness < 50 suggests AI (too flat)
-    if metrics['burstiness'] < 50:
-        score += 25
-    elif metrics['burstiness'] < 80:
-        score += 10
-    # Hapax ratio < 0.35 suggests limited vocab
-    if metrics['hapax_ratio'] < 0.35:
-        score += 25
-    elif metrics['hapax_ratio'] < 0.45:
-        score += 10
+    for metric, config in AI_THRESHOLDS.items():
+        (strong_thresh, strong_penalty), (weak_thresh, weak_penalty), lower_is_bad = config
+        value = metrics.get(metric, 0)
+
+        if lower_is_bad:
+            if value < strong_thresh:
+                score += strong_penalty
+            elif value < weak_thresh:
+                score += weak_penalty
+        else: # Higher is bad
+            if value > strong_thresh:
+                score += strong_penalty
+            elif value > weak_thresh:
+                score += weak_penalty
+
     return min(score, 100)
 
 
@@ -203,14 +145,14 @@ def format_sources(sources):
         lines.append(f"- Query: _{s['query']}_")
         lines.append(f"  Engine: {s['engine']}")
         for r in s['results']:
-            title = r.get('title', r.get('title', '?'))
-            url = r.get('url', r.get('url', '?'))
+            title = r.get('title', '?')
+            url = r.get('url', '?')
             lines.append(f"  - [{title}]({url})")
         lines.append("")
     return "\n".join(lines)
 
 
-def main():
+async def main():
     text = sys.stdin.read()
     words_raw = text.split()
     total_words = len(words_raw)
@@ -219,10 +161,9 @@ def main():
     metrics = calculate_ai_metrics(text)
     score = ai_score(metrics)
 
-    print(">> Checking plagiarism (multi-engine, rate-limited)...", file=sys.stderr)
-    plag_score, sources = plagiarism_check(text)
+    plag_score, sources = await plagiarism_check(text)
 
-    print("# Document Analysis Report (V3 - Google + ddgr)")
+    print("# Document Analysis Report (V6 - Flexible Scoring)")
     print(f"- **Total Words:** {total_words}")
     print(f"- **AI Score (Estimated):** {score}%")
     print(f"- **Plagiarism Score:** {plag_score * 100:.0f}%")
@@ -239,13 +180,13 @@ def main():
         print(f"- Hapax Legomena Ratio: {metrics['hapax_ratio']:.3f}")
 
     print("\n## Threshold Reference")
-    print("| Metric | AI Flag | Human |")
-    print("|--------|---------|-------|")
-    print("| TTR | < 0.40 | >= 0.45 |")
-    print("| N-gram Diversity | < 0.50 | >= 0.60 |")
-    print("| Burstiness | < 50 | >= 80 |")
-    print("| Hapax Ratio | < 0.35 | >= 0.45 |")
+    print("| Metric | AI Flag (Strong) | AI Flag (Weak) |")
+    print("|--------|------------------|----------------|")
+    for name, config in AI_THRESHOLDS.items():
+        (strong, _), (weak, _), lower_is_bad = config
+        op = "<" if lower_is_bad else ">"
+        print(f"| {name.replace('_', ' ').title()} | {op} {strong:.2f} | {op} {weak:.2f} |")
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

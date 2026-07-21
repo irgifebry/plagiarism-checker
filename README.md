@@ -17,7 +17,7 @@ Open‑source tool for detecting plagiarism and AI‑generated text in DOCX, PDF
 ---  
 
 ## Features
-- **Plagiarism detection** – extracts sentences, searches via `ddgr` (DuckDuckGo) and estimates similarity.  
+- **Plagiarism detection** – extracts sentences, searches via DuckDuckGo's API and estimates similarity.  
 - **AI‑generated text detection** – uses statistical metrics:  
   - Type‑Token Ratio (TTR)  
   - N‑gram diversity (3‑grams)  
@@ -52,12 +52,8 @@ python3 -m venv venv
 source venv/bin/activate   # .\\venv\\Scripts\\activate on Windows PowerShell
 
 # 3. Install required Python packages
-pip install pymupdf python-docx requests beautifulsoup4
+pip install pymupdf python-docx duckduckgo-search
 
-# 4. Install the web-search CLI (ddgr)
-sudo apt install ddgr -y   # Debian/Ubuntu
-# macOS: brew install ddgr
-# Windows (chocolatey): choco install ddgr
 ```
 
 > After activation, your shell prompt should show `(venv)`. All subsequent `python` and `pip` commands refer to this isolated environment.
@@ -132,8 +128,7 @@ cd plagiarism-checker
 git clone https://github.com/irgifebry/plagiarism-checker.git .
 python3 -m venv venv
 source venv/bin/activate
-pip install pymupdf python-docx requests beautifulsoup4
-sudo apt install ddgr -y
+pip install pymupdf python-docx duckduckgo-search
 hermes status --show-skills   # verify
 
 # Usage
@@ -148,8 +143,7 @@ mkdir -p ~/.claude-code/tools/plagiarism-checker
 git clone https://github.com/irgifebry/plagiarism-checker.git ~/.claude-code/tools/plagiarism-checker
 python3 -m venv ~/.claude-code/tools/plagiarism-checker/venv
 source ~/.claude-code/tools/plagiarism-checker/venv/bin/activate
-pip install pymupdf python-docx requests beautifulsoup4
-sudo apt install ddgr -y
+pip install pymupdf python-docx duckduckgo-search
 
 # In Claude Code chat:
 #   “Run plagiarism check on proposal.docx”
@@ -160,7 +154,6 @@ sudo apt install ddgr -y
 mkdir -p ~/.cursor/tools/plagiarism-checker
 git clone https://github.com/irgifebry/plagiarism-checker.git ~/.cursor/tools/plagiarism-checker
 pip install --user pymupdf python-docx requests beautifulsoup4
-sudo apt install ddgr -y
 
 # Add a custom command (e.g., in Settings → Commands):
 #   cmd: python3 ~/.cursor/tools/plagiarism-checker/scripts/analyze.py
@@ -174,8 +167,7 @@ git clone https://github.com/irgifebry/plagiarism-checker.git ~/.windsurf/tools/
 cd ~/.windsurf/tools/plagiarism-checker
 python3 -m venv venv
 source venv/bin/activate
-pip install pymupdf python-docx requests beautifulsoup4
-sudo apt install ddgr
+pip install pymupdf python-docx duckduckgo-search
 
 # Optional: expose as MCP server (see docs/windsurf-mcp.json)
 ```
@@ -187,8 +179,7 @@ git clone https://github.com/irgifebry/plagiarism-checker.git ~/.aws/tools/plagi
 cd ~/.aws/tools/plagiarism-checker
 python3 -m venv venv
 source venv/bin/activate
-pip install pymupdf python-docx requests beautifulsoup4
-sudo apt install ddgr
+pip install pymupdf python-docx duckduckgo-search
 
 # Create a wrapper script:
 cat > ~/.aws/tools/plagiarism-checker/run.sh <<'EOF'
@@ -209,8 +200,7 @@ opencode tools install plagiarism-checker \
 cd ~/.opencode/tools/plagiarism-checker
 python3 -m venv venv
 source venv/bin/activate
-pip install pymupdf python-docx requests beautifulsoup4
-sudo apt install ddgr
+pip install pymupdf python-docx duckduckgo-search
 # Use via the OpenCode CLI: `opencode run "plagiarism-checker document.docx"`
 ```
 
@@ -250,7 +240,6 @@ Output (truncated):
 | Symptom | Likely Cause | Fix |
 |---------|--------------|-----|
 | `ModuleNotFoundError: No module named 'fitz'` | `pymupdf` not installed or broken | `pip install --upgrade pymupdf` (may need system packages: `sudo apt install python3-pip libfreetype6-dev`) |
-| `ddgr: command not found` | `ddjr` CLI missing | `sudo apt install ddgr -y` (or `brew install ddgr` / `choco install ddgr`) |
 | Permission denied when running scripts | Virtual env not activated | Run `source venv/bin/activate` (Linux/macOS) or `.\venv\Scripts\activate` (Windows) |
 | Rate‑limit / HTTP 429 from search | Too many requests in short time | Increase `DELAY` constant in `scripts/analyze.py` (default 3 s) to 5‑10 s |
 | “Protected View” warning in Word | DOCX opened in Protected View | Click **Enable Editing** – does not affect analysis |
